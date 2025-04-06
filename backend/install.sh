@@ -1,15 +1,17 @@
 #!/bin/bash
 
-# Create and configure installation directory
-sudo mkdir -p /opt/server-dashboard
+# Create system user
+sudo useradd -r -s /bin/bash -d /opt/server-dashboard server-dashboard
 
 # Copy application files
 sudo cp -r requirements.txt /opt/server-dashboard
 sudo cp -r app /opt/server-dashboard
 
-
-# Create system user
-sudo useradd -r -s /bin/false -m -d /opt/server-dashboard server-dashboard
+sudo su - server-dashboard 
+/usr/bin/python3 -m venv /opt/server-dashboard/env
+source /opt/server-dashboard/env/bin/activate
+pip install -r requirements.txt
+exit
 
 # Set ownership
 sudo chown -R server-dashboard:server-dashboard /opt/server-dashboard
@@ -40,3 +42,4 @@ EOL
 sudo systemctl daemon-reload
 sudo systemctl enable server-dashboard
 sudo systemctl start server-dashboard
+sudo systemctl status server-dashboard

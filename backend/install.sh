@@ -40,6 +40,6 @@ EOL
 
 # Enable and start service
 sudo systemctl daemon-reload
-sudo systemctl enable server-dashboard
-sudo systemctl start server-dashboard
+sudo systemctl enable --now server-dashboard
+sleep 2
 sudo systemctl status server-dashboard

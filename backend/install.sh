@@ -4,7 +4,7 @@
 sudo mkdir -p /opt/server-dashboard
 
 # Copy application files
-sudo cp -r env /opt/server-dashboard
+sudo cp -r requirements.txt /opt/server-dashboard
 sudo cp -r app /opt/server-dashboard
 
 

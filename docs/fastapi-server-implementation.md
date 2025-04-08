@@ -1,8 +1,8 @@
-# Python Backend Implementation Plan
+# FastAPI Server Implementation Plan
 
 ```mermaid
 graph TD
-    A[Python Backend Implementation] --> B[Setup]
+    A[FastAPI Server Implementation] --> B[Setup]
     A --> C[API Implementation]
     A --> D[System Configuration]
     B --> B1[Create Virtual Environment]
@@ -39,7 +39,7 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
-@app.get("/api/hc")
+@app.get("/hc")
 async def health_check():
     return {"status": "online"}
 ```

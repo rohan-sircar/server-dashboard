@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Create system user
-sudo useradd -r -s /bin/bash -d /opt/server-dashboard server-dashboard
+sudo useradd --system -s /usr/sbin/nologin -d /opt/server-dashboard server-dashboard
 
 # Copy application files
 sudo cp -r requirements.txt /opt/server-dashboard
@@ -14,7 +14,7 @@ pip install -r requirements.txt
 exit
 
 # Set ownership
-sudo chown -R server-dashboard:server-dashboard /opt/server-dashboard
+sudo chown -R server-dashboard:users /opt/server-dashboard
 
 # Configure sudoers
 echo "server-dashboard ALL=(root) NOPASSWD: /bin/systemctl suspend" | sudo tee /etc/sudoers.d/server-dashboard

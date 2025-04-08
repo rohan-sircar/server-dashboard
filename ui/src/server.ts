@@ -6,7 +6,7 @@ const app = express();
 const HOST = process.env.SD_NODE_HOST || "localhost";
 const PORT = parseInt(process.env.SD_NODE_PORT || "3000");
 const MAC_ADDRESS = process.env.SD_TARGET_MAC || "XX:XX:XX:XX:XX:XX";
-const FASTAPI_URL = process.env.SD_FASTAPI_URL || "http://rohan-desktop:8085";
+const FASTAPI_URL = process.env.SD_FASTAPI_URL || "http://localhost:8080";
 const FASTAPI_TIMEOUT = parseInt(process.env.SD_FASTAPI_TIMEOUT || "10000");
 const POLL_INTERVAL = parseInt(process.env.SD_POLL_INTERVAL || "5000");
 

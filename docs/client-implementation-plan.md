@@ -73,9 +73,44 @@
 
 ## 4. Updated Deployment Process
 
+### 4.1 Create System User
+
+```bash
+sudo useradd --system --s /usr/sbin/nologin -d /opt/server-dashboard server-dashboard
+```
+
+### 4.2 Configure Sudoers
+
+Create /etc/sudoers.d/server-dashboard with:
+
+```
+server-dashboard ALL=(root) NOPASSWD: /usr/sbin/etherwake
+```
+
+### 4.3 Install Node for system-dashboard user
+
 ### Systemd Service Setup
 
-1. Create service file at `/etc/systemd/system/pc-dashboard.service`:
+1. Create .env file
+
+```
+    # FastAPI backend URL (e.g. http://192.168.1.100:8000)
+    SD_FASTAPI_URL=http://localhost:8000
+
+    # MAC address for Wake-on-LAN (e.g. 00:1A:2B:3C:4D:5E)
+    SD_TARGET_MAC=XX:XX:XX:XX:XX:XX
+
+    # Health check polling interval in milliseconds (default: 5000)
+    SD_POLL_INTERVAL=5000
+
+    # Node server host (default: localhost)
+    SD_NODE_HOST=localhost
+
+    # Node server port (default: 3000)
+    SD_NODE_PORT=3000
+```
+
+2. Create service file at `/etc/systemd/system/pc-dashboard.service`:
 
    ```ini
    [Unit]
@@ -86,8 +121,8 @@
    Environment=FASTAPI_URL=http://your-server-ip:8000
    Environment=TARGET_MAC=XX:XX:XX:XX:XX:XX
    Environment=POLL_INTERVAL=5000
-   WorkingDirectory=/opt/pc-dashboard
-   ExecStart=/usr/bin/node dist/server.js
+   WorkingDirectory=/opt/server-dashboard/ui
+   ExecStart=/path/to/bin/node --env-file=.env dist/server.js
    Restart=always
    User=server-dashboard
 
@@ -95,7 +130,7 @@
    WantedBy=multi-user.target
    ```
 
-2. Enable and start service:
+3. Enable and start service:
    ```bash
    sudo systemctl daemon-reload
    sudo systemctl enable pc-dashboard
@@ -108,17 +143,3 @@
 - Better performance for network operations
 - Simpler debugging of network issues
 - No container networking complications
-
-### Environment Setup
-
-1. Copy `.env.template` to `.env`
-2. Set required values:
-   ```env
-   FASTAPI_URL=http://your-server-ip:8000
-   TARGET_MAC=XX:XX:XX:XX:XX:XX
-   POLL_INTERVAL=5000
-   ```
-3. Add to `.gitignore`:
-   ```
-   .env
-   ```

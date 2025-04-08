@@ -85,7 +85,7 @@ async def custom_exception_handler(request, exc):
 ### 3.1 Create System User
 
 ```bash
-sudo useradd -r -s /bin/false -m -d /opt/server-dashboard server-dashboard
+sudo useradd --system --s /usr/sbin/nologin -d /opt/server-dashboard server-dashboard
 ```
 
 ### 3.2 Configure Sudoers

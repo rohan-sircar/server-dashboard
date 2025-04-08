@@ -10,6 +10,8 @@ const FASTAPI_URL = process.env.SD_FASTAPI_URL || "http://localhost:8080";
 const FASTAPI_TIMEOUT = parseInt(process.env.SD_FASTAPI_TIMEOUT || "10000");
 const POLL_INTERVAL = parseInt(process.env.SD_POLL_INTERVAL || "5000");
 
+console.info("FastAPI URL: ", FASTAPI_URL);
+
 app.use(express.json());
 
 // Serve static files only if not in development
@@ -55,6 +57,7 @@ app.get("/api/config", (req, res) => {
 });
 
 app.post("/api/wake", (req, res) => {
+  console.info("Attempting to wake server with MAC address:", MAC_ADDRESS);
   exec(`sudo /usr/sbin/etherwake ${MAC_ADDRESS}`, (error, stdout) => {
     if (error) {
       console.error(`Error executing etherwake: ${error}`);
@@ -65,6 +68,7 @@ app.post("/api/wake", (req, res) => {
 });
 
 app.post("/api/suspend", async (req, res) => {
+  console.info("Attempting to suspend server at:", FASTAPI_URL);
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);

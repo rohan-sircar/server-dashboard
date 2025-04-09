@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useCallback, useEffect, useState } from "react";
 import "./App.css";
 
@@ -21,8 +22,8 @@ const App = () => {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
+        console.info("Loading config");
         const response = await fetch("/api/config");
-        console.info("Get config", response);
         const data = await response.json();
         setConfig({
           pollInterval: parseInt(data.pollInterval) || 5000,
@@ -87,7 +88,6 @@ const App = () => {
   const checkStatus = useCallback(async () => {
     try {
       const res = await fetch("/hc");
-      console.info("healthcheck result: ", res);
       const data = await res.json();
       setStatus(data.serverStatus || "offline");
     } catch (error) {
@@ -118,7 +118,6 @@ const App = () => {
     try {
       const res = await fetch("/api/wake", { method: "POST" });
       const data = await res.json();
-      console.log(data);
     } catch (error) {
       console.error("Failed to wake the server", error);
     }
@@ -132,7 +131,6 @@ const App = () => {
         method: "POST",
       });
       const data = await res.json();
-      console.log(data);
     } catch (error) {
       console.error("Failed to suspend the server", error);
     }

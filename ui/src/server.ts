@@ -10,6 +10,9 @@ const FASTAPI_URL = process.env.SD_FASTAPI_URL || "http://localhost:8080";
 const FASTAPI_TIMEOUT = parseInt(process.env.SD_FASTAPI_TIMEOUT || "10000");
 const POLL_INTERVAL = parseInt(process.env.SD_POLL_INTERVAL || "5000");
 
+// Track the current server state
+let currentServerState: "online" | "offline" | null = null;
+
 console.info("FastAPI URL: ", FASTAPI_URL);
 
 app.use(express.json());
@@ -32,12 +35,26 @@ app.get("/hc", async (req, res) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    console.info("Server is online");
+
     const data = await response.json();
+    const newState = "online";
+
+    // Log only if the state has changed
+    if (currentServerState !== newState) {
+      console.info("FastApi Server became online");
+      currentServerState = newState;
+    }
     res.send({ status: "ok", serverStatus: data.status });
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
-      console.debug("Server status check timed out");
+      const newState = "offline";
+
+      // Log only if the state has changed
+      if (currentServerState !== newState) {
+        console.debug("FastApi Server went offline");
+        currentServerState = newState;
+      }
+
       res.status(200).send({ status: "ok", serverStatus: "offline" });
     } else {
       console.error("Failed to check server status:", error);

@@ -6,7 +6,6 @@ interface Toast {
   message: string;
   type: "info" | "success" | "error";
 }
-import "./App.css";
 
 interface Config {
   pollInterval: number;
@@ -17,6 +16,8 @@ const App = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [config, setConfig] = useState<Config>();
   const [status, setStatus] = useState<string>("offline");
+  const [prevStatus, setPrevStatus] = useState<string>("offline");
+  const [llmServerStatus, setLlmServerStatus] = useState<string>("offline");
 
   // Fetch config from backend
   useEffect(() => {
@@ -90,14 +91,28 @@ const App = () => {
       const res = await fetch("/hc");
       const data = await res.json();
       setStatus(data.serverStatus || "offline");
+      setLlmServerStatus(data.llmServerStatus || "offline");
     } catch (error) {
       console.error(error);
       setStatus("offline");
+      setLlmServerStatus("offline");
     }
   }, []);
 
   // Run immediately on window load
   window.addEventListener("load", checkStatus);
+
+  // Show toast on status change
+  useEffect(() => {
+    if (prevStatus !== status) {
+      if (status === "online") {
+        showToast("Server came online", "success");
+      } else if (status === "offline") {
+        showToast("Server went offline", "error");
+      }
+      setPrevStatus(status);
+    }
+  }, [status, prevStatus]);
 
   useEffect(() => {
     // Set up polling interval
@@ -136,6 +151,26 @@ const App = () => {
     }
   };
 
+  const handleLlmStart = async () => {
+    showToast("Starting LLM Server...");
+    try {
+      const res = await fetch("/api/llm/start", { method: "POST" });
+      const data = await res.json();
+    } catch (error) {
+      console.error("Failed to start LLM server", error);
+    }
+  };
+
+  const handleLlmStop = async () => {
+    showToast("Stopping LLM Server...");
+    try {
+      const res = await fetch("/api/llm/stop", { method: "POST" });
+      const data = await res.json();
+    } catch (error) {
+      console.error("Failed to stop LLM server", error);
+    }
+  };
+
   return (
     <>
       <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -155,8 +190,35 @@ const App = () => {
         </div>
         <div style={{ marginTop: "20px" }}>
           <button onClick={handleWake}>Wake Server</button>
-          <button onClick={handleSuspend} style={{ marginLeft: "20px" }}>
+          <button
+            onClick={handleSuspend}
+            style={{ marginLeft: "20px" }}
+            disabled={llmServerStatus === "online"}
+          >
             Suspend Server
+          </button>
+        </div>
+        <div style={{ marginTop: "20px" }}>
+          <span
+            style={{
+              height: "20px",
+              width: "20px",
+              backgroundColor: llmServerStatus === "online" ? "green" : "grey",
+              borderRadius: "50%",
+              display: "inline-block",
+              marginRight: "10px",
+            }}
+          />
+          <span>LLM Server: {llmServerStatus.toUpperCase()}</span>
+        </div>
+        <div style={{ marginTop: "20px" }}>
+          <button onClick={handleLlmStart}>Start LLM Server</button>
+          <button
+            onClick={handleLlmStop}
+            style={{ marginLeft: "20px" }}
+            // disabled={llmServerStatus === "offline"}
+          >
+            Stop LLM Server
           </button>
         </div>
       </div>

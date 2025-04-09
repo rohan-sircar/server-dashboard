@@ -44,7 +44,11 @@ app.get("/hc", async (req, res) => {
       console.info("FastApi Server became online");
       currentServerState = newState;
     }
-    res.send({ status: "ok", serverStatus: data.status });
+    res.send({
+      status: "ok",
+      serverStatus: data.status,
+      llmServerStatus: data.llmServerStatus,
+    });
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
       const newState = "offline";
@@ -108,6 +112,56 @@ app.post("/api/suspend", async (req, res) => {
   } catch (error) {
     console.error("Failed to suspend the server:", error);
     res.status(500).send({ error: "Failed to suspend the server" });
+  }
+});
+
+app.post("/api/llm/stop", async (req, res) => {
+  console.info("Attempting to stop LLM server at:", FASTAPI_URL);
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
+
+    const response = await fetch(`${FASTAPI_URL}/api/llm/stop`, {
+      method: "POST",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    res.send(data);
+  } catch (error) {
+    console.error("Failed to stop the LLM server:", error);
+    res.status(500).send({ error: "Failed to stop the LLM server" });
+  }
+});
+
+app.post("/api/llm/start", async (req, res) => {
+  console.info("Attempting to start LLM server at:", FASTAPI_URL);
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
+
+    const response = await fetch(`${FASTAPI_URL}/api/llm/start`, {
+      method: "POST",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    res.send(data);
+  } catch (error) {
+    console.error("Failed to stop the LLM server:", error);
+    res.status(500).send({ error: "Failed to stop the LLM server" });
   }
 });
 

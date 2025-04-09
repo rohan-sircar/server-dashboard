@@ -57,7 +57,9 @@ app.get("/hc", async (req, res) => {
 
       res.status(200).send({ status: "ok", serverStatus: "offline" });
     } else {
-      console.error("Failed to check server status:", error);
+      if (currentServerState !== "offline") {
+        console.error("Failed to check server status:", error);
+      }
       res
         .status(500)
         .send({ status: "error", message: "Failed to check server status" });

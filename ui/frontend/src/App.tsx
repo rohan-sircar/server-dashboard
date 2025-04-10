@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useCallback, useEffect, useState } from "react";
+import { ClipLoader } from "react-spinners";
 import "./App.css";
 
 interface Toast {
@@ -18,6 +19,7 @@ const App = () => {
   const [status, setStatus] = useState<string>("offline");
   const [prevStatus, setPrevStatus] = useState<string>("offline");
   const [llmServerStatus, setLlmServerStatus] = useState<string>("offline");
+  const [loading, setLoading] = useState(true);
 
   // Fetch config from backend
   useEffect(() => {
@@ -87,6 +89,7 @@ const App = () => {
 
   // Function to poll the PC server's status through the local Node backend
   const checkStatus = useCallback(async () => {
+    setLoading(true);
     try {
       const res = await fetch("/hc");
       const data = await res.json();
@@ -96,6 +99,8 @@ const App = () => {
       console.error(error);
       setStatus("offline");
       setLlmServerStatus("offline");
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -180,13 +185,25 @@ const App = () => {
             style={{
               height: "20px",
               width: "20px",
-              backgroundColor: status === "online" ? "green" : "grey",
+              backgroundColor: loading
+                ? "transparent"
+                : status === "online"
+                ? "green"
+                : "grey",
               borderRadius: "50%",
               display: "inline-block",
               marginRight: "10px",
             }}
-          />
-          <span>{status.toUpperCase()}</span>
+          >
+            {loading && (
+              <ClipLoader
+                color="#36d7b7"
+                size={20}
+                cssOverride={{ display: "inline-block" }}
+              />
+            )}
+          </span>
+          <span>{loading ? "CHECKING..." : status.toUpperCase()}</span>
         </div>
         <div style={{ marginTop: "20px" }}>
           <button onClick={handleWake}>Wake Server</button>
@@ -203,13 +220,28 @@ const App = () => {
             style={{
               height: "20px",
               width: "20px",
-              backgroundColor: llmServerStatus === "online" ? "green" : "grey",
+              backgroundColor: loading
+                ? "transparent"
+                : llmServerStatus === "online"
+                ? "green"
+                : "grey",
               borderRadius: "50%",
               display: "inline-block",
               marginRight: "10px",
             }}
-          />
-          <span>LLM Server: {llmServerStatus.toUpperCase()}</span>
+          >
+            {loading && (
+              <ClipLoader
+                color="#36d7b7"
+                size={20}
+                cssOverride={{ display: "inline-block" }}
+              />
+            )}
+          </span>
+          <span>
+            LLM Server:{" "}
+            {loading ? "CHECKING..." : llmServerStatus.toUpperCase()}
+          </span>
         </div>
         <div style={{ marginTop: "20px" }}>
           <button onClick={handleLlmStart}>Start LLM Server</button>

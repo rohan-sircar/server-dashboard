@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useCallback, useEffect, useState } from "react";
 import { ClipLoader } from "react-spinners";
+import TimeAgo from "react-timeago";
 import "./App.css";
 
 interface Toast {
@@ -20,6 +21,7 @@ const App = () => {
   const [prevStatus, setPrevStatus] = useState<string>("offline");
   const [llmServerStatus, setLlmServerStatus] = useState<string>("offline");
   const [loading, setLoading] = useState(true);
+  const [lastChecked, setLastChecked] = useState<Date | null>(null);
 
   // Fetch config from backend
   useEffect(() => {
@@ -35,7 +37,7 @@ const App = () => {
       } catch (error) {
         console.error("Failed to fetch config", error);
         setConfig({
-          pollInterval: 5000,
+          pollInterval: 10000,
           fastapiTimeout: 10000,
         });
       }
@@ -95,10 +97,12 @@ const App = () => {
       const data = await res.json();
       setStatus(data.serverStatus || "offline");
       setLlmServerStatus(data.llmServerStatus || "offline");
+      setLastChecked(new Date());
     } catch (error) {
       console.error(error);
       setStatus("offline");
       setLlmServerStatus("offline");
+      setLastChecked(new Date());
     } finally {
       setLoading(false);
     }
@@ -203,7 +207,16 @@ const App = () => {
               />
             )}
           </span>
-          <span>{loading ? "CHECKING..." : status.toUpperCase()}</span>
+          <span>
+            {loading ? "CHECKING..." : status.toUpperCase()}
+            {lastChecked && (
+              <span
+                style={{ marginLeft: "8px", color: "#666", fontSize: "0.9em" }}
+              >
+                (Last checked <TimeAgo date={lastChecked} minPeriod={6} />)
+              </span>
+            )}
+          </span>
         </div>
         <div style={{ marginTop: "20px" }}>
           <button onClick={handleWake}>Wake Server</button>
@@ -241,6 +254,13 @@ const App = () => {
           <span>
             LLM Server:{" "}
             {loading ? "CHECKING..." : llmServerStatus.toUpperCase()}
+            {lastChecked && (
+              <span
+                style={{ marginLeft: "8px", color: "#666", fontSize: "0.9em" }}
+              >
+                (Last checked <TimeAgo date={lastChecked} minPeriod={6} />)
+              </span>
+            )}
           </span>
         </div>
         <div style={{ marginTop: "20px" }}>

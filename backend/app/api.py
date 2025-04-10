@@ -8,9 +8,10 @@ import logging
 app = FastAPI()
 
 # Setup logging
-logging.basicConfig(filename='server.log', level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 llama_server_url = os.getenv("LLAMA_SERVER_URL", "http://localhost:8002")
+
 
 @app.get("/hc")
 async def health_check():
@@ -33,6 +34,7 @@ async def health_check():
             "llmServerStatus": "offline"
         }
 
+
 @app.post("/api/suspend")
 async def suspend():
     try:
@@ -47,10 +49,12 @@ async def suspend():
             detail=f"System suspend failed: {str(e)}"
         )
 
+
 @app.post("/api/llm/stop")
 async def stop_llm():
     try:
-        subprocess.run(["sudo", "systemctl", "stop", "llama.cpp-server.service"], check=True)
+        subprocess.run(["sudo", "systemctl", "stop",
+                       "llama.cpp-server.service"], check=True)
         return JSONResponse(
             status_code=200,
             content={"status": "stopping"}
@@ -61,10 +65,12 @@ async def stop_llm():
             detail=f"LLM stop failed: {str(e)}"
         )
 
+
 @app.post("/api/llm/start")
 async def start_llm():
     try:
-        subprocess.run(["sudo", "systemctl", "start", "llama.cpp-server.service"], check=True)
+        subprocess.run(["sudo", "systemctl", "start",
+                       "llama.cpp-server.service"], check=True)
         return JSONResponse(
             status_code=200,
             content={"status": "starting"}
@@ -74,6 +80,7 @@ async def start_llm():
             status_code=500,
             detail=f"LLM start failed: {str(e)}"
         )
+
 
 @app.get("/api/llm/status")
 async def llm_status():
@@ -92,6 +99,7 @@ async def llm_status():
             status_code=503,
             detail=f"Could not connect to LLM server: {str(e)}"
         )
+
 
 @app.exception_handler(Exception)
 async def custom_exception_handler(request, exc):

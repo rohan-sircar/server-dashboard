@@ -5,11 +5,12 @@
   "main": "src/server.ts",
   "scripts": {
     "frontend:dev": "vite --config frontend/vite.config.ts",
-    "frontend:build": "vite build --config frontend/vite.config.ts",
     "backend:dev": "NODE_ENV=development tsx src/server.ts",
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "frontend:build": "vite build --config frontend/vite.config.ts",
     "backend:build": "tsc -p tsconfig.backend.json",
-    "start": "npm run backend:build && npm run frontend:build && node dist/server.js",
-    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\""
+    "build": "npm run backend:build && npm run frontend:build",
+    "start": "npm run backend:build && npm run frontend:build && node dist/server.js"
   },
   "dependencies": {
     "express": "^5.1.0",

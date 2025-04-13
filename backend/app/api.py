@@ -10,14 +10,14 @@ app = FastAPI()
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 
-llama_server_url = os.getenv("LLAMA_SERVER_URL", "http://localhost:8002")
+llama_server_url = os.getenv("LLAMA_SERVER_URL", "http://localhost:8080")
 
 
 @app.get("/hc")
 async def health_check():
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(f"{llama_server_url}/health")
+            response = await client.get(f"{llama_server_url}/v1/models")
             response.raise_for_status()
             return {
                 "status": "online",
@@ -86,7 +86,7 @@ async def start_llm():
 async def llm_status():
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(f"{llama_server_url}/health")
+            response = await client.get(f"{llama_server_url}/v1/models")
             response.raise_for_status()
             return response.json()
     except httpx.HTTPStatusError as e:

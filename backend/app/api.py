@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI, HTTPException
 import httpx
 from fastapi.responses import JSONResponse
-import subprocess
+import asyncio
 import logging
 
 app = FastAPI()
@@ -38,12 +38,18 @@ async def health_check():
 @app.post("/api/suspend")
 async def suspend():
     try:
-        subprocess.run(["sudo", "systemctl", "suspend"], check=True)
+        process = await asyncio.create_subprocess_exec(
+            "sudo", "systemctl", "suspend"
+        )
+        await process.wait()
+        if process.returncode != 0:
+            raise RuntimeError(
+                f"Process failed with code {process.returncode}")
         return JSONResponse(
             status_code=200,
             content={"status": "suspending"}
         )
-    except subprocess.CalledProcessError as e:
+    except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"System suspend failed: {str(e)}"
@@ -53,13 +59,18 @@ async def suspend():
 @app.post("/api/llm/stop")
 async def stop_llm():
     try:
-        subprocess.run(["sudo", "systemctl", "stop",
-                       "llama.cpp-server.service"], check=True)
+        process = await asyncio.create_subprocess_exec(
+            "sudo", "systemctl", "stop", "llama.cpp-server.service"
+        )
+        await process.wait()
+        if process.returncode != 0:
+            raise RuntimeError(
+                f"Process failed with code {process.returncode}")
         return JSONResponse(
             status_code=200,
             content={"status": "stopping"}
         )
-    except subprocess.CalledProcessError as e:
+    except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"LLM stop failed: {str(e)}"
@@ -69,13 +80,18 @@ async def stop_llm():
 @app.post("/api/llm/start")
 async def start_llm():
     try:
-        subprocess.run(["sudo", "systemctl", "start",
-                       "llama.cpp-server.service"], check=True)
+        process = await asyncio.create_subprocess_exec(
+            "sudo", "systemctl", "start", "llama.cpp-server.service"
+        )
+        await process.wait()
+        if process.returncode != 0:
+            raise RuntimeError(
+                f"Process failed with code {process.returncode}")
         return JSONResponse(
             status_code=200,
             content={"status": "starting"}
         )
-    except subprocess.CalledProcessError as e:
+    except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"LLM start failed: {str(e)}"

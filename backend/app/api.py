@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 
 llama_server_url = os.getenv("LLAMA_SERVER_URL", "http://localhost:8080")
 comfyui_server_url = os.getenv("COMFYUI_SERVER_URL", "http://localhost:8188")
-alltalk_server_url = os.getenv("ALLTALK_SERVER_URL", "http://localhost:8062")
+alltalk_server_url = os.getenv("ALLTALK_SERVER_URL", "http://localhost:8061")
 
 
 @app.get("/hc")

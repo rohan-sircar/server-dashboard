@@ -228,7 +228,13 @@ async def alltalk_status():
         async with httpx.AsyncClient() as client:
             response = await client.get(f"{alltalk_server_url}/api/ready")
             response.raise_for_status()
-            return response.json()
+            if response.text == "Ready":
+                return {"status": "ready"}
+            else:
+                raise HTTPException(
+                    status_code=502,
+                    detail=f"AllTalk TTS server returned unexpected response: {response.text}"
+                )
     except httpx.HTTPStatusError as e:
         raise HTTPException(
             status_code=502,

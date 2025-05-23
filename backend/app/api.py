@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.INFO)
 
 llama_server_url = os.getenv("LLAMA_SERVER_URL", "http://localhost:8080")
 comfyui_server_url = os.getenv("COMFYUI_SERVER_URL", "http://localhost:8188")
+alltalk_server_url = os.getenv("ALLTALK_SERVER_URL", "http://localhost:8062")
 
 
 @app.get("/hc")
@@ -176,6 +177,67 @@ async def comfyui_status():
         raise HTTPException(
             status_code=503,
             detail=f"Could not connect to ComfyUI server: {str(e)}"
+        )
+
+
+@app.post("/api/alltalk-tts/stop")
+async def stop_alltalk():
+    try:
+        process = await asyncio.create_subprocess_exec(
+            "sudo", "systemctl", "stop", "alltalk-server.service"
+        )
+        await process.wait()
+        if process.returncode != 0:
+            raise RuntimeError(
+                f"Process failed with code {process.returncode}")
+        return JSONResponse(
+            status_code=200,
+            content={"status": "stopping"}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"AllTalk TTS stop failed: {str(e)}"
+        )
+
+
+@app.post("/api/alltalk-tts/start")
+async def start_alltalk():
+    try:
+        process = await asyncio.create_subprocess_exec(
+            "sudo", "systemctl", "start", "alltalk-server.service"
+        )
+        await process.wait()
+        if process.returncode != 0:
+            raise RuntimeError(
+                f"Process failed with code {process.returncode}")
+        return JSONResponse(
+            status_code=200,
+            content={"status": "starting"}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"AllTalk TTS start failed: {str(e)}"
+        )
+
+
+@app.get("/api/alltalk-tts/status")
+async def alltalk_status():
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{alltalk_server_url}/api/ready")
+            response.raise_for_status()
+            return response.json()
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"AllTalk TTS server returned error: {str(e)}"
+        )
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Could not connect to AllTalk TTS server: {str(e)}"
         )
 
 

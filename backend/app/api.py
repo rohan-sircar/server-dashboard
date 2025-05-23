@@ -247,6 +247,74 @@ async def alltalk_status():
         )
 
 
+@app.post("/api/alltalk-finetune/stop")
+async def stop_alltalk_finetune():
+    try:
+        process = await asyncio.create_subprocess_exec(
+            "sudo", "systemctl", "stop", "alltalk-finetune.service"
+        )
+        await process.wait()
+        if process.returncode != 0:
+            raise RuntimeError(
+                f"Process failed with code {process.returncode}")
+        return JSONResponse(
+            status_code=200,
+            content={"status": "stopping"}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"AllTalk Finetune stop failed: {str(e)}"
+        )
+
+
+@app.post("/api/alltalk-finetune/start")
+async def start_alltalk_finetune():
+    try:
+        process = await asyncio.create_subprocess_exec(
+            "sudo", "systemctl", "start", "alltalk-finetune.service"
+        )
+        await process.wait()
+        if process.returncode != 0:
+            raise RuntimeError(
+                f"Process failed with code {process.returncode}")
+        return JSONResponse(
+            status_code=200,
+            content={"status": "starting"}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"AllTalk Finetune start failed: {str(e)}"
+        )
+
+
+# doesn't work, finetune UI does not expose a hc endpoint
+@app.get("/api/alltalk-finetune/status")
+async def alltalk_finetune_status():
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{alltalk_finetune_url}/api/ready")
+            response.raise_for_status()
+            if response.text == "Ready":
+                return {"status": "ready"}
+            else:
+                raise HTTPException(
+                    status_code=502,
+                    detail=f"AllTalk Finetune server returned unexpected response: {response.text}"
+                )
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"AllTalk Finetune server returned error: {str(e)}"
+        )
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Could not connect to AllTalk Finetune server: {str(e)}"
+        )
+
+
 @app.exception_handler(Exception)
 async def custom_exception_handler(request, exc):
     logging.error(f"Error occurred: {str(exc)}")

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useCallback, useEffect, useState } from "react";
+import ServiceLogViewer from "./components/ServiceLogViewer";
 import { ClipLoader } from "react-spinners";
 import TimeAgo from "react-timeago";
 import "./App.css";
@@ -16,6 +17,7 @@ interface Config {
 
 const App = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [showLogs, setShowLogs] = useState(false);
   const [config, setConfig] = useState<Config>();
   const [status, setStatus] = useState<string>("offline");
   const [prevStatus, setPrevStatus] = useState<string>("offline");
@@ -272,8 +274,20 @@ const App = () => {
           >
             Stop LLM Server
           </button>
+          <button
+            onClick={() => setShowLogs(true)}
+            style={{ marginLeft: "20px" }}
+          >
+            Show Logs
+          </button>
         </div>
       </div>
+      {showLogs && (
+        <ServiceLogViewer
+          serviceName="llama.cpp-server"
+          onClose={() => setShowLogs(false)}
+        />
+      )}
       <ToastContainer />
     </>
   );

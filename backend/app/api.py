@@ -1,3 +1,5 @@
+import re
+from fastapi.responses import StreamingResponse
 import os
 from fastapi import FastAPI, HTTPException
 import httpx
@@ -313,6 +315,39 @@ async def alltalk_finetune_status():
             status_code=503,
             detail=f"Could not connect to AllTalk Finetune server: {str(e)}"
         )
+
+
+SERVICE_NAME_PATTERN = r"^[a-zA-Z0-9\-\.]+$"
+
+
+@app.get("/logs/{service_name}")
+async def stream_logs(service_name: str):
+    """Stream logs for a specific service using journalctl"""
+    if not re.match(SERVICE_NAME_PATTERN, service_name):
+        raise HTTPException(status_code=400, detail="Invalid service name")
+
+    cmd = f"sudo journalctl -f -u {service_name}"
+    proc = await asyncio.create_subprocess_shell(
+        cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.STDOUT
+    )
+
+    async def generate():
+        try:
+            while True:
+                line = await proc.stdout.readline()
+                if not line:
+                    break
+                yield f"data: {line.decode()}\n\n"
+        finally:
+            proc.terminate()
+            try:
+                await proc.wait()
+            except:
+                pass
+
+    return StreamingResponse(generate(), media_type="text/event-stream")
 
 
 @app.exception_handler(Exception)

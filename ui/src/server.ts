@@ -165,6 +165,50 @@ app.post("/api/llm/start", async (req, res) => {
   }
 });
 
+// Log streaming endpoint
+app.get("/api/logs/:serviceName", async (req, res) => {
+  const { serviceName } = req.params;
+
+  try {
+    // Set SSE headers
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    // Forward to FastAPI backend
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
+
+    const response = await fetch(`${FASTAPI_URL}/logs/${serviceName}`, {
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Stream the response to client
+    if (response.body) {
+      const reader = response.body.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        res.write(value);
+      }
+    }
+
+    // Handle client disconnect
+    req.on("close", () => {
+      controller.abort();
+    });
+  } catch (error) {
+    console.error("Log streaming error:", error);
+    res.status(500).json({ error: "Failed to stream logs" });
+  }
+});
+
 app.listen(PORT, HOST, () => {
   console.log(`Node server listening on http://${HOST}:${PORT}`);
 });

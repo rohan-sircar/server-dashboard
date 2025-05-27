@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import Modal from "react-modal";
+import { LazyLog, ScrollFollow } from "@melloware/react-logviewer";
+import "react-log-viewer/dist/index.css";
+
+// Set the app element for accessibility
+Modal.setAppElement("#root");
 
 interface ServiceLogViewerProps {
   serviceName: string;
@@ -11,50 +17,115 @@ const ServiceLogViewer: React.FC<ServiceLogViewerProps> = ({
   maxLines = 500,
   onClose,
 }) => {
-  const [logs, setLogs] = useState<string[]>([]);
-
-  useEffect(() => {
-    const eventSource = new EventSource(`/api/logs/${serviceName}`);
-
-    eventSource.onmessage = (event) => {
-      setLogs((prevLogs) => {
-        const newLogs = [...prevLogs, event.data];
-        // Keep only the last maxLines logs
-        return newLogs.slice(-maxLines);
-      });
-    };
-
-    eventSource.onerror = () => {
-      console.error("SSE connection error");
-      eventSource.close();
-    };
-
-    return () => {
-      eventSource.close();
-    };
-  }, [serviceName, maxLines]);
+  const [autoScroll, setAutoScroll] = useState(true);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-4xl max-h-[80vh] flex flex-col">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Logs for {serviceName}</h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-          >
-            &times;
-          </button>
+    <Modal
+      isOpen={true}
+      onRequestClose={onClose}
+      contentLabel={`${serviceName} Logs`}
+      style={{
+        overlay: {
+          backgroundColor: "rgba(0, 0, 0, 0.75)",
+          zIndex: 1000,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        content: {
+          position: "relative",
+          width: "90vw",
+          height: "90vh",
+          maxWidth: "1200px",
+          margin: "0 auto",
+          padding: 0,
+          border: "none",
+          borderRadius: "8px",
+          background: "#1e1e1e",
+          overflow: "hidden",
+          inset: "auto",
+        },
+      }}
+    >
+      <div className="flex flex-col h-full">
+        {/* Header - Fixed at the top */}
+        <div className="flex justify-between items-center p-4 bg-gray-900 border-b border-gray-700 sticky top-0 z-10">
+          <h2 className="text-white text-lg font-semibold">
+            {serviceName} Logs
+          </h2>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setAutoScroll((prev) => !prev)}
+              className={`px-3 py-1 rounded text-sm ${
+                autoScroll
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-700 text-gray-300"
+              }`}
+            >
+              {autoScroll ? "Auto-scroll: On" : "Auto-scroll: Off"}
+            </button>
+            <button
+              onClick={onClose}
+              className="bg-gray-800 hover:bg-gray-700 text-white rounded-full w-8 h-8 flex items-center justify-center"
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
         </div>
-        <div className="overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900 flex-1">
-          <pre className="text-sm font-mono">
-            {logs.map((log, index) => (
-              <div key={index}>{log}</div>
-            ))}
-          </pre>
+
+        <div style={{ height: "80vh", width: "100%" }}>
+          <ScrollFollow
+            startFollowing={true}
+            render={({ onScroll }) => (
+              <LazyLog
+                follow={autoScroll}
+                url={`/api/logs/${serviceName}`}
+                onScroll={onScroll}
+                lineHeight={21}
+                enableSearch
+                selectableLines
+                extraLines={1}
+                style={{
+                  backgroundColor: "#1e1e1e",
+                  color: "#d4d4d4",
+                }}
+                formatPart={(text) => {
+                  // Custom formatting for different log levels
+                  if (text.includes("ERROR") || text.includes("FATAL")) {
+                    return <span style={{ color: "#f56c6c" }}>{text}</span>;
+                  }
+                  if (text.includes("WARN")) {
+                    return <span style={{ color: "#e6a23c" }}>{text}</span>;
+                  }
+                  if (text.includes("INFO")) {
+                    return <span style={{ color: "#67c23a" }}>{text}</span>;
+                  }
+                  return text;
+                }}
+                stream
+              />
+            )}
+          />
         </div>
+
+        {/* Footer with stats 
+        <div className="p-3 bg-gray-900 border-t border-gray-700 flex justify-between items-center sticky bottom-0 z-10">
+          <div className="text-gray-400 text-sm">
+            {logs.length} {logs.length === 1 ? "line" : "lines"}
+            {maxLines && logs.length === maxLines && ` (max ${maxLines})`}
+          </div>
+          {!autoScroll && (
+            <button
+              onClick={() => setAutoScroll(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
+            >
+              <span>Scroll to Bottom</span>
+            </button>
+          )}
+        </div>*/}
       </div>
-    </div>
+    </Modal>
   );
 };
 

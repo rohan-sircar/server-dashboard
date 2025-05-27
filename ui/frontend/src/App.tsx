@@ -283,10 +283,10 @@ const App = () => {
         </div>
       </div>
       {showLogs && (
-        <ServiceLogViewer
-          serviceName="llama.cpp-server"
-          onClose={() => setShowLogs(false)}
-        />
+          <ServiceLogViewer
+            serviceName="llama.cpp-server"
+            onClose={() => setShowLogs(false)}
+          />
       )}
       <ToastContainer />
     </>

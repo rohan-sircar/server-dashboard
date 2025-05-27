@@ -13,6 +13,7 @@
     "start": "npm run backend:build && npm run frontend:build && node dist/server.js"
   },
   "dependencies": {
+    "@melloware/react-logviewer": "^6.2.0",
     "express": "^5.1.0",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.0.0",

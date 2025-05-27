@@ -1,23 +1,37 @@
 import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
 import { LazyLog, ScrollFollow } from "@melloware/react-logviewer";
-// import "react-log-viewer/dist/index.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faAngleDoubleDown as AutoScrollIcon,
+  faTextWidth as WrapLinesIcon,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
 
 // Set the app element for accessibility
 Modal.setAppElement("#root");
 
 interface ServiceLogViewerProps {
   serviceName: string;
-  maxLines?: number;
   onClose: () => void;
 }
 
 const ServiceLogViewer: React.FC<ServiceLogViewerProps> = ({
   serviceName,
-  maxLines = 500,
   onClose,
 }) => {
   const [autoScroll, setAutoScroll] = useState(true);
+  const [wrapLines, setWrapLines] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <Modal
@@ -50,10 +64,20 @@ const ServiceLogViewer: React.FC<ServiceLogViewerProps> = ({
       <div className="flex flex-col h-full">
         {/* Header - Fixed at the top */}
         <div className="flex justify-between items-center p-4 bg-gray-900 border-b border-gray-700 sticky top-0 z-10">
-          <h2 className="text-white text-lg font-semibold">
-            {serviceName} Logs
-          </h2>
           <div className="flex items-center gap-3">
+            <button
+              onClick={onClose}
+              className="bg-gray-800 hover:bg-gray-700 text-white rounded-full w-8 h-8 flex items-center justify-center"
+              aria-label="Close"
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+            <span
+              className="text-white text-lg font-semibold"
+              style={{ display: isMobile ? "none" : "inline" }}
+            >
+              {serviceName} logs
+            </span>
             <button
               onClick={() => setAutoScroll((prev) => !prev)}
               className={`px-3 py-1 rounded text-sm ${
@@ -62,14 +86,35 @@ const ServiceLogViewer: React.FC<ServiceLogViewerProps> = ({
                   : "bg-gray-700 text-gray-300"
               }`}
             >
-              {autoScroll ? "Auto-scroll: On" : "Auto-scroll: Off"}
+              <FontAwesomeIcon
+                icon={AutoScrollIcon}
+                style={{
+                  display: isMobile ? "inline-block" : "none",
+                  color: autoScroll ? "#10b981" : "inherit",
+                }}
+              />
+              <span style={{ display: isMobile ? "none" : "inline-block" }}>
+                {autoScroll ? "Auto-scroll: On" : "Auto-scroll: Off"}
+              </span>
             </button>
             <button
-              onClick={onClose}
-              className="bg-gray-800 hover:bg-gray-700 text-white rounded-full w-8 h-8 flex items-center justify-center"
-              aria-label="Close"
+              onClick={() => setWrapLines((prev) => !prev)}
+              className={`px-3 py-1 rounded text-sm ${
+                wrapLines
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-700 text-gray-300"
+              }`}
             >
-              ×
+              <FontAwesomeIcon
+                icon={WrapLinesIcon}
+                style={{
+                  display: isMobile ? "inline-block" : "none",
+                  color: wrapLines ? "#10b981" : "inherit",
+                }}
+              />
+              <span style={{ display: isMobile ? "none" : "inline-block" }}>
+                {wrapLines ? "Wrap Lines: On" : "Wrap Lines: Off"}
+              </span>
             </button>
           </div>
         </div>
@@ -84,6 +129,7 @@ const ServiceLogViewer: React.FC<ServiceLogViewerProps> = ({
                 onScroll={onScroll}
                 lineHeight={21}
                 enableSearch
+                wrapLines={wrapLines}
                 selectableLines
                 extraLines={1}
                 style={{

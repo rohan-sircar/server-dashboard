@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
 import { LazyLog, ScrollFollow } from "@melloware/react-logviewer";
-import "react-log-viewer/dist/index.css";
+// import "react-log-viewer/dist/index.css";
 
 // Set the app element for accessibility
 Modal.setAppElement("#root");

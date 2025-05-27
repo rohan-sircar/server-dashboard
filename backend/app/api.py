@@ -339,7 +339,7 @@ async def stream_logs(service_name: str):
                 line = await proc.stdout.readline()
                 if not line:
                     break
-                yield f"data: {line.decode()}\n\n"
+                yield f"{line.decode()}"
         finally:
             proc.terminate()
             try:

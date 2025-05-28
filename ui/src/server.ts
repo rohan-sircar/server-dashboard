@@ -321,11 +321,6 @@ app.get("/api/logs/:serviceName", async (req, res) => {
   const { serviceName } = req.params;
 
   try {
-    // Set SSE headers
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
-
     // Forward to FastAPI backend
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
@@ -339,6 +334,11 @@ app.get("/api/logs/:serviceName", async (req, res) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    // Set SSE headers
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
 
     // Stream the response to client
     if (response.body) {
@@ -356,7 +356,9 @@ app.get("/api/logs/:serviceName", async (req, res) => {
     });
   } catch (error) {
     console.error("Log streaming error:", error);
-    res.status(500).json({ error: "Failed to stream logs" });
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Failed to stream logs" });
+    }
   }
 });
 

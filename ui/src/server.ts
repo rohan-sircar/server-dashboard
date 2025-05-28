@@ -48,6 +48,7 @@ app.get("/hc", async (req, res) => {
       status: "ok",
       serverStatus: data.status,
       llmServerStatus: data.llmServerStatus,
+      comfyuiServerStatus: data.comfyuiServerStatus || "offline",
     });
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
@@ -162,6 +163,81 @@ app.post("/api/llm/start", async (req, res) => {
   } catch (error) {
     console.error("Failed to stop the LLM server:", error);
     res.status(500).send({ error: "Failed to stop the LLM server" });
+  }
+});
+
+// ComfyUI endpoints
+app.post("/api/comfyui/stop", async (req, res) => {
+  console.info("Attempting to stop ComfyUI server at:", FASTAPI_URL);
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
+
+    const response = await fetch(`${FASTAPI_URL}/api/comfyui/stop`, {
+      method: "POST",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    res.send(data);
+  } catch (error) {
+    console.error("Failed to stop the ComfyUI server:", error);
+    res.status(500).send({ error: "Failed to stop the ComfyUI server" });
+  }
+});
+
+app.post("/api/comfyui/start", async (req, res) => {
+  console.info("Attempting to start ComfyUI server at:", FASTAPI_URL);
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
+
+    const response = await fetch(`${FASTAPI_URL}/api/comfyui/start`, {
+      method: "POST",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    res.send(data);
+  } catch (error) {
+    console.error("Failed to start the ComfyUI server:", error);
+    res.status(500).send({ error: "Failed to start the ComfyUI server" });
+  }
+});
+
+app.get("/api/comfyui/status", async (req, res) => {
+  console.info("Checking ComfyUI server status at:", FASTAPI_URL);
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
+
+    const response = await fetch(`${FASTAPI_URL}/api/comfyui/status`, {
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    res.send(data);
+  } catch (error) {
+    console.error("Failed to get ComfyUI server status:", error);
+    res.status(500).send({ error: "Failed to get ComfyUI server status" });
   }
 });
 

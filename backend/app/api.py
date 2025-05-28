@@ -21,21 +21,34 @@ alltalk_server_url = os.getenv("ALLTALK_SERVER_URL", "http://localhost:8061")
 async def health_check():
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(f"{llama_server_url}/v1/models")
-            response.raise_for_status()
+            # Check LLM server status
+            llm_status = "online"
+            try:
+                await client.get(f"{llama_server_url}/v1/models")
+            except httpx.HTTPStatusError:
+                llm_status = "offline"
+            except httpx.RequestError:
+                llm_status = "offline"
+
+            # Check ComfyUI server status
+            comfyui_status = "online"
+            try:
+                await client.get(f"{comfyui_server_url}/system_stats")
+            except httpx.HTTPStatusError:
+                comfyui_status = "offline"
+            except httpx.RequestError:
+                comfyui_status = "offline"
+
             return {
                 "status": "online",
-                "llmServerStatus": "online"
+                "llmServerStatus": llm_status,
+                "comfyuiServerStatus": comfyui_status
             }
-    except httpx.HTTPStatusError:
+    except Exception:
         return {
             "status": "online",
-            "llmServerStatus": "offline"
-        }
-    except httpx.RequestError:
-        return {
-            "status": "online",
-            "llmServerStatus": "offline"
+            "llmServerStatus": "offline",
+            "comfyuiServerStatus": "offline"
         }
 
 

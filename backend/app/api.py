@@ -39,16 +39,29 @@ async def health_check():
             except httpx.RequestError:
                 comfyui_status = "offline"
 
+            # Check AllTalk TTS server status
+            alltalk_status = "online"
+            try:
+                response = await client.get(f"{alltalk_server_url}/api/ready")
+                if response.text != "Ready":
+                    alltalk_status = "offline"
+            except httpx.HTTPStatusError:
+                alltalk_status = "offline"
+            except httpx.RequestError:
+                alltalk_status = "offline"
+
             return {
                 "status": "online",
                 "llmServerStatus": llm_status,
-                "comfyuiServerStatus": comfyui_status
+                "comfyuiServerStatus": comfyui_status,
+                "alltalkTtsServerStatus": alltalk_status
             }
     except Exception:
         return {
             "status": "online",
             "llmServerStatus": "offline",
-            "comfyuiServerStatus": "offline"
+            "comfyuiServerStatus": "offline",
+            "alltalkTtsServerStatus": "offline"
         }
 
 

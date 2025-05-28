@@ -7,6 +7,7 @@ import "./App.css";
 import ServerMonitor from "./components/ServerMonitor";
 import LlamaServerMonitor from "./components/LlamaServerMonitor";
 import ComfyuiServerMonitor from "./components/ComfyuiServerMonitor";
+import AlltalkTtsServerMonitor from "./components/AlltalkTtsServerMonitor";
 
 interface Config {
   pollInterval: number;
@@ -20,6 +21,8 @@ const App = () => {
   const [status, setStatus] = useState<string>("offline");
   const [llmServerStatus, setLlmServerStatus] = useState<string>("offline");
   const [comfyuiServerStatus, setComfyuiServerStatus] =
+    useState<string>("offline");
+  const [alltalkTtsServerStatus, setAlltalkTtsServerStatus] =
     useState<string>("offline");
   const [loading, setLoading] = useState(true);
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
@@ -56,6 +59,7 @@ const App = () => {
       setStatus(data.serverStatus || "offline");
       setLlmServerStatus(data.llmServerStatus || "offline");
       setComfyuiServerStatus(data.comfyuiServerStatus || "offline");
+      setAlltalkTtsServerStatus(data.alltalkTtsServerStatus || "offline");
       setLastChecked(new Date());
     } catch (error) {
       console.error(error);
@@ -97,6 +101,12 @@ const App = () => {
           onShowLogs={function (): void {
             throw new Error("Function not implemented.");
           }}
+          showToast={showToast}
+        />
+        <AlltalkTtsServerMonitor
+          status={alltalkTtsServerStatus}
+          loading={loading}
+          lastChecked={lastChecked}
           showToast={showToast}
         />
         <ComfyuiServerMonitor

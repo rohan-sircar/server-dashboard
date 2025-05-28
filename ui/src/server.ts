@@ -241,6 +241,81 @@ app.get("/api/comfyui/status", async (req, res) => {
   }
 });
 
+// AllTalk TTS endpoints
+app.post("/api/alltalk-tts/stop", async (req, res) => {
+  console.info("Attempting to stop AllTalk TTS server at:", FASTAPI_URL);
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
+
+    const response = await fetch(`${FASTAPI_URL}/api/alltalk-tts/stop`, {
+      method: "POST",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    res.send(data);
+  } catch (error) {
+    console.error("Failed to stop the AllTalk TTS server:", error);
+    res.status(500).send({ error: "Failed to stop the AllTalk TTS server" });
+  }
+});
+
+app.post("/api/alltalk-tts/start", async (req, res) => {
+  console.info("Attempting to start AllTalk TTS server at:", FASTAPI_URL);
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
+
+    const response = await fetch(`${FASTAPI_URL}/api/alltalk-tts/start`, {
+      method: "POST",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    res.send(data);
+  } catch (error) {
+    console.error("Failed to start the AllTalk TTS server:", error);
+    res.status(500).send({ error: "Failed to start the AllTalk TTS server" });
+  }
+});
+
+app.get("/api/alltalk-tts/status", async (req, res) => {
+  console.info("Checking AllTalk TTS server status at:", FASTAPI_URL);
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
+
+    const response = await fetch(`${FASTAPI_URL}/api/alltalk-tts/status`, {
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    res.send(data);
+  } catch (error) {
+    console.error("Failed to get AllTalk TTS server status:", error);
+    res.status(500).send({ error: "Failed to get AllTalk TTS server status" });
+  }
+});
+
 // Log streaming endpoint
 app.get("/api/logs/:serviceName", async (req, res) => {
   const { serviceName } = req.params;

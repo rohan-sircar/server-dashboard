@@ -128,7 +128,7 @@ app.post("/api/service/:serviceName/:action", async (req, res) => {
   }
 
   // Validate service
-  const validServices = ["llm", "comfyui", "alltalk-tts"];
+  const validServices = ["llm", "comfyui", "alltalk-tts", "alltalk-finetune"];
   if (!validServices.includes(serviceName)) {
     res.status(400).send({ error: "Invalid service" });
     return;
@@ -145,7 +145,7 @@ app.post("/api/service/:serviceName/:action", async (req, res) => {
 
     const method = action === "status" ? "GET" : "POST";
     const response = await fetch(
-      `${FASTAPI_URL}/api/${serviceName}/${action}`,
+      `${FASTAPI_URL}/api/service/${serviceName}/${action}`,
       {
         method,
         signal: controller.signal,
@@ -166,6 +166,7 @@ app.post("/api/service/:serviceName/:action", async (req, res) => {
   }
 });
 
+// TODO rename to /api/logs/service_name
 // Log streaming endpoint
 app.get("/api/logs/:serviceName", async (req, res) => {
   const { serviceName } = req.params;

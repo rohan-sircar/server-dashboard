@@ -19,7 +19,7 @@ const LlamaServerMonitor: React.FC<LlamaServerMonitorProps> = ({
   const handleStart = async () => {
     showToast("Starting LLM Server...");
     try {
-      await fetch("/api/llm/start", { method: "POST" });
+      await fetch("/api/service/llm/start", { method: "POST" });
     } catch (error) {
       console.error("Failed to start LLM server", error);
     }
@@ -28,7 +28,7 @@ const LlamaServerMonitor: React.FC<LlamaServerMonitorProps> = ({
   const handleStop = async () => {
     showToast("Stopping LLM Server...");
     try {
-      await fetch("/api/llm/stop", { method: "POST" });
+      await fetch("/api/service/llm/stop", { method: "POST" });
     } catch (error) {
       console.error("Failed to stop LLM server", error);
     }

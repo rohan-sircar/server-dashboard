@@ -20,7 +20,7 @@ const AlltalkTtsServerMonitor: React.FC<AlltalkTtsServerMonitorProps> = ({
   const handleStart = async () => {
     showToast("Starting AllTalk TTS Server...");
     try {
-      await fetch("/api/alltalk-tts/start", { method: "POST" });
+      await fetch("/api/service/alltalk-tts/start", { method: "POST" });
     } catch (error) {
       console.error("Failed to start AllTalk TTS server", error);
     }
@@ -29,7 +29,7 @@ const AlltalkTtsServerMonitor: React.FC<AlltalkTtsServerMonitorProps> = ({
   const handleStop = async () => {
     showToast("Stopping AllTalk TTS Server...");
     try {
-      await fetch("/api/alltalk-tts/stop", { method: "POST" });
+      await fetch("/api/service/alltalk-tts/stop", { method: "POST" });
     } catch (error) {
       console.error("Failed to stop AllTalk TTS server", error);
     }

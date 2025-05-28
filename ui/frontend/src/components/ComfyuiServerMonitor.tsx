@@ -19,7 +19,7 @@ const ComfyuiServerMonitor: React.FC<ComfyuiServerMonitorProps> = ({
   const handleStart = async () => {
     showToast("Starting ComfyUI Server...");
     try {
-      await fetch("/api/comfyui/start", { method: "POST" });
+      await fetch("/api/service/comfyui/start", { method: "POST" });
     } catch (error) {
       console.error("Failed to start ComfyUI server", error);
     }
@@ -28,7 +28,7 @@ const ComfyuiServerMonitor: React.FC<ComfyuiServerMonitorProps> = ({
   const handleStop = async () => {
     showToast("Stopping ComfyUI Server...");
     try {
-      await fetch("/api/comfyui/stop", { method: "POST" });
+      await fetch("/api/service/comfyui/stop", { method: "POST" });
     } catch (error) {
       console.error("Failed to stop ComfyUI server", error);
     }

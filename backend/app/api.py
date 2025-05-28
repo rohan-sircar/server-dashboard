@@ -43,8 +43,6 @@ async def health_check():
             alltalk_status = "online"
             try:
                 response = await client.get(f"{alltalk_server_url}/api/ready")
-                if response.text != "Ready":
-                    alltalk_status = "offline"
             except httpx.HTTPStatusError:
                 alltalk_status = "offline"
             except httpx.RequestError:

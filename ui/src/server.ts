@@ -116,203 +116,53 @@ app.post("/api/suspend", async (req, res) => {
   }
 });
 
-app.post("/api/llm/stop", async (req, res) => {
-  console.info("Attempting to stop LLM server at:", FASTAPI_URL);
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
+// Unified service control endpoint
+app.post("/api/service/:serviceName/:action", async (req, res) => {
+  const { serviceName, action } = req.params;
 
-    const response = await fetch(`${FASTAPI_URL}/api/llm/stop`, {
-      method: "POST",
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    res.send(data);
-  } catch (error) {
-    console.error("Failed to stop the LLM server:", error);
-    res.status(500).send({ error: "Failed to stop the LLM server" });
+  // Validate action
+  const validActions = ["start", "stop", "status"];
+  if (!validActions.includes(action)) {
+    res.status(400).send({ error: "Invalid action" });
+    return;
   }
-});
 
-app.post("/api/llm/start", async (req, res) => {
-  console.info("Attempting to start LLM server at:", FASTAPI_URL);
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
-
-    const response = await fetch(`${FASTAPI_URL}/api/llm/start`, {
-      method: "POST",
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    res.send(data);
-  } catch (error) {
-    console.error("Failed to stop the LLM server:", error);
-    res.status(500).send({ error: "Failed to stop the LLM server" });
+  // Validate service
+  const validServices = ["llm", "comfyui", "alltalk-tts"];
+  if (!validServices.includes(serviceName)) {
+    res.status(400).send({ error: "Invalid service" });
+    return;
   }
-});
 
-// ComfyUI endpoints
-app.post("/api/comfyui/stop", async (req, res) => {
-  console.info("Attempting to stop ComfyUI server at:", FASTAPI_URL);
+  console.info(
+    `Attempting to ${action} ${serviceName} server at:`,
+    FASTAPI_URL
+  );
+
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
 
-    const response = await fetch(`${FASTAPI_URL}/api/comfyui/stop`, {
-      method: "POST",
-      signal: controller.signal,
-    });
+    const method = action === "status" ? "GET" : "POST";
+    const response = await fetch(
+      `${FASTAPI_URL}/api/${serviceName}/${action}`,
+      {
+        method,
+        signal: controller.signal,
+      }
+    );
 
     clearTimeout(timeout);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
-    const data = await response.json();
-    res.send(data);
   } catch (error) {
-    console.error("Failed to stop the ComfyUI server:", error);
-    res.status(500).send({ error: "Failed to stop the ComfyUI server" });
-  }
-});
-
-app.post("/api/comfyui/start", async (req, res) => {
-  console.info("Attempting to start ComfyUI server at:", FASTAPI_URL);
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
-
-    const response = await fetch(`${FASTAPI_URL}/api/comfyui/start`, {
-      method: "POST",
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    res.send(data);
-  } catch (error) {
-    console.error("Failed to start the ComfyUI server:", error);
-    res.status(500).send({ error: "Failed to start the ComfyUI server" });
-  }
-});
-
-app.get("/api/comfyui/status", async (req, res) => {
-  console.info("Checking ComfyUI server status at:", FASTAPI_URL);
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
-
-    const response = await fetch(`${FASTAPI_URL}/api/comfyui/status`, {
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    res.send(data);
-  } catch (error) {
-    console.error("Failed to get ComfyUI server status:", error);
-    res.status(500).send({ error: "Failed to get ComfyUI server status" });
-  }
-});
-
-// AllTalk TTS endpoints
-app.post("/api/alltalk-tts/stop", async (req, res) => {
-  console.info("Attempting to stop AllTalk TTS server at:", FASTAPI_URL);
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
-
-    const response = await fetch(`${FASTAPI_URL}/api/alltalk-tts/stop`, {
-      method: "POST",
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    res.send(data);
-  } catch (error) {
-    console.error("Failed to stop the AllTalk TTS server:", error);
-    res.status(500).send({ error: "Failed to stop the AllTalk TTS server" });
-  }
-});
-
-app.post("/api/alltalk-tts/start", async (req, res) => {
-  console.info("Attempting to start AllTalk TTS server at:", FASTAPI_URL);
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
-
-    const response = await fetch(`${FASTAPI_URL}/api/alltalk-tts/start`, {
-      method: "POST",
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    res.send(data);
-  } catch (error) {
-    console.error("Failed to start the AllTalk TTS server:", error);
-    res.status(500).send({ error: "Failed to start the AllTalk TTS server" });
-  }
-});
-
-app.get("/api/alltalk-tts/status", async (req, res) => {
-  console.info("Checking AllTalk TTS server status at:", FASTAPI_URL);
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
-
-    const response = await fetch(`${FASTAPI_URL}/api/alltalk-tts/status`, {
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    res.send(data);
-  } catch (error) {
-    console.error("Failed to get AllTalk TTS server status:", error);
-    res.status(500).send({ error: "Failed to get AllTalk TTS server status" });
+    console.error(`Failed to ${action} the ${serviceName} server:`, error);
+    res
+      .status(500)
+      .send({ error: `Failed to ${action} the ${serviceName} server` });
+    return;
   }
 });
 

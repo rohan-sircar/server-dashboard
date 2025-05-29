@@ -178,8 +178,7 @@ async def service_status(service_name: str):
 SERVICE_NAME_PATTERN = r"^[a-zA-Z0-9\-\.]+$"
 
 
-# TODO rename to /api/logs/service_name
-@app.get("/logs/{service_name}")
+@app.get("/api/logs/{service_name}")
 async def stream_logs(service_name: str):
     """Stream logs for a specific service using journalctl"""
     if not re.match(SERVICE_NAME_PATTERN, service_name):

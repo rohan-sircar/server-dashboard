@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { ToastContainer } from "./components/Toast";
 import { Toast, createShowToast } from "./utils/toast";
-import { useServerStatusToast } from "./hooks/useServerStatusToast";
+import { useStatusToast } from "./hooks/useServerStatusToast";
 import "./App.css";
 import ServerMonitor from "./components/ServerMonitor";
 import LlamaServerMonitor from "./components/LlamaServerMonitor";
@@ -74,7 +74,10 @@ const App = () => {
   // Run immediately on window load
   window.addEventListener("load", checkStatus);
 
-  useServerStatusToast(status, showToast);
+  useStatusToast(status, "Server", showToast);
+  useStatusToast(llmServerStatus, "LLM Server", showToast);
+  useStatusToast(comfyuiServerStatus, "ComfyUI Server", showToast);
+  useStatusToast(alltalkTtsServerStatus, "AllTalk TTS Server", showToast);
 
   useEffect(() => {
     // Set up polling interval

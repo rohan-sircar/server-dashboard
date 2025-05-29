@@ -134,7 +134,7 @@ const App = () => {
       <CssBaseline />
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Typography variant="h1" align="center" gutterBottom>
-          PC Server Monitor
+          AI Server Monitor
         </Typography>
 
         <Box

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useCallback, useEffect, useState } from "react";
 import { ToastContainer } from "./components/Toast";
 import { Toast, createShowToast } from "./utils/toast";
@@ -14,16 +13,9 @@ import {
   CssBaseline,
   Container,
   Typography,
-  Card,
-  CardContent,
   Box,
 } from "@mui/material";
-import {
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-  Warning as WarningIcon,
-  PauseCircle as PauseCircleIcon,
-} from "@mui/icons-material";
+import MonitorCard from "./components/MonitorCard";
 
 // Create dark theme with accent color
 const theme = createTheme({
@@ -146,105 +138,45 @@ const App = () => {
             justifyContent: "center",
           }}
         >
-          <Box sx={{ width: { xs: "100%", md: "48%" } }}>
-            <Card
-              className="monitor-card"
-              sx={{
-                background:
-                  "linear-gradient(to bottom right, #1e1e1e, #2a2a2a)",
-                boxShadow: 3,
-                borderRadius: 2,
-                "&:hover": {
-                  boxShadow: 6,
-                },
+          <MonitorCard>
+            <ServerMonitor
+              status={status}
+              loading={loading}
+              lastChecked={lastChecked}
+              llmServerStatus={llmServerStatus}
+              onShowLogs={() => {
+                throw new Error("Function not implemented.");
               }}
-            >
-              <CardContent>
-                <ServerMonitor
-                  status={status}
-                  loading={loading}
-                  lastChecked={lastChecked}
-                  llmServerStatus={llmServerStatus}
-                  onShowLogs={function (): void {
-                    throw new Error("Function not implemented.");
-                  }}
-                  showToast={showToast}
-                />
-              </CardContent>
-            </Card>
-          </Box>
+              showToast={showToast}
+            />
+          </MonitorCard>
 
-          <Box sx={{ width: { xs: "100%", md: "48%" } }}>
-            <Card
-              className="monitor-card"
-              sx={{
-                background:
-                  "linear-gradient(to bottom right, #1e1e1e, #2a2a2a)",
-                boxShadow: 3,
-                borderRadius: 2,
-                "&:hover": {
-                  boxShadow: 6,
-                },
-              }}
-            >
-              <CardContent>
-                <AlltalkTtsServerMonitor
-                  status={alltalkTtsServerStatus}
-                  loading={loading}
-                  lastChecked={lastChecked}
-                  showToast={showToast}
-                />
-              </CardContent>
-            </Card>
-          </Box>
+          <MonitorCard>
+            <AlltalkTtsServerMonitor
+              status={alltalkTtsServerStatus}
+              loading={loading}
+              lastChecked={lastChecked}
+              showToast={showToast}
+            />
+          </MonitorCard>
 
-          <Box sx={{ width: { xs: "100%", md: "48%" } }}>
-            <Card
-              className="monitor-card"
-              sx={{
-                background:
-                  "linear-gradient(to bottom right, #1e1e1e, #2a2a2a)",
-                boxShadow: 3,
-                borderRadius: 2,
-                "&:hover": {
-                  boxShadow: 6,
-                },
-              }}
-            >
-              <CardContent>
-                <ComfyuiServerMonitor
-                  status={comfyuiServerStatus}
-                  loading={loading}
-                  lastChecked={lastChecked}
-                  showToast={showToast}
-                />
-              </CardContent>
-            </Card>
-          </Box>
+          <MonitorCard>
+            <ComfyuiServerMonitor
+              status={comfyuiServerStatus}
+              loading={loading}
+              lastChecked={lastChecked}
+              showToast={showToast}
+            />
+          </MonitorCard>
 
-          <Box sx={{ width: { xs: "100%", md: "48%" } }}>
-            <Card
-              className="monitor-card"
-              sx={{
-                background:
-                  "linear-gradient(to bottom right, #1e1e1e, #2a2a2a)",
-                boxShadow: 3,
-                borderRadius: 2,
-                "&:hover": {
-                  boxShadow: 6,
-                },
-              }}
-            >
-              <CardContent>
-                <LlamaServerMonitor
-                  status={llmServerStatus}
-                  loading={loading}
-                  lastChecked={lastChecked}
-                  showToast={showToast}
-                />
-              </CardContent>
-            </Card>
-          </Box>
+          <MonitorCard>
+            <LlamaServerMonitor
+              status={llmServerStatus}
+              loading={loading}
+              lastChecked={lastChecked}
+              showToast={showToast}
+            />
+          </MonitorCard>
         </Box>
 
         <ToastContainer toasts={toasts} />

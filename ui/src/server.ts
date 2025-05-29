@@ -175,7 +175,7 @@ app.get("/api/logs/:serviceName", async (req, res) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), FASTAPI_TIMEOUT);
 
-    const response = await fetch(`${FASTAPI_URL}/logs/${serviceName}`, {
+    const response = await fetch(`${FASTAPI_URL}/api/logs/${serviceName}`, {
       signal: controller.signal,
     });
 

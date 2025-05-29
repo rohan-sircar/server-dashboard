@@ -137,14 +137,18 @@ const ServiceLogViewer: React.FC<ServiceLogViewerProps> = ({
                   color: "#d4d4d4",
                 }}
                 formatPart={(text) => {
-                  // Custom formatting for different log levels
-                  if (text.includes("ERROR") || text.includes("FATAL")) {
+                  // Custom formatting for different log levels (case-insensitive)
+                  const lowerText = text.toLowerCase();
+                  if (
+                    lowerText.includes("error") ||
+                    lowerText.includes("fatal")
+                  ) {
                     return <span style={{ color: "#f56c6c" }}>{text}</span>;
                   }
-                  if (text.includes("WARN")) {
+                  if (lowerText.includes("warn")) {
                     return <span style={{ color: "#e6a23c" }}>{text}</span>;
                   }
-                  if (text.includes("INFO")) {
+                  if (lowerText.includes("info")) {
                     return <span style={{ color: "#67c23a" }}>{text}</span>;
                   }
                   return text;

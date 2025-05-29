@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import MonitorComponent from "./MonitorComponent";
-import ServiceLogViewer from "./ServiceLogViewer";
+import React from "react";
+import ServiceMonitorComponent from "./ServiceMonitorComponent";
 
 interface ComfyuiServerMonitorProps {
   status: string;
@@ -15,43 +14,16 @@ const ComfyuiServerMonitor: React.FC<ComfyuiServerMonitorProps> = ({
   lastChecked,
   showToast,
 }) => {
-  const [showComfyuiServerLogs, setShowComfyuiServerLogs] = useState(false);
-  const handleStart = async () => {
-    showToast("Starting ComfyUI Server...");
-    try {
-      await fetch("/api/service/comfyui/start", { method: "POST" });
-    } catch (error) {
-      console.error("Failed to start ComfyUI server", error);
-    }
-  };
-
-  const handleStop = async () => {
-    showToast("Stopping ComfyUI Server...");
-    try {
-      await fetch("/api/service/comfyui/stop", { method: "POST" });
-    } catch (error) {
-      console.error("Failed to stop ComfyUI server", error);
-    }
-  };
-
   return (
-    <>
-      <MonitorComponent
-        status={status}
-        loading={loading}
-        lastChecked={lastChecked}
-        serviceName="ComfyUI Server"
-        onStart={handleStart}
-        onStop={handleStop}
-        onShowLogs={() => setShowComfyuiServerLogs(true)}
-      />
-      {showComfyuiServerLogs && (
-        <ServiceLogViewer
-          serviceName="comfyui-server"
-          onClose={() => setShowComfyuiServerLogs(false)}
-        />
-      )}
-    </>
+    <ServiceMonitorComponent
+      status={status}
+      loading={loading}
+      lastChecked={lastChecked}
+      showToast={showToast}
+      serviceName="comfyui-server"
+      servicePath="comfyui"
+      displayName="ComfyUI Server"
+    />
   );
 };
 

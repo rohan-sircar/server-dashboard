@@ -166,7 +166,6 @@ app.post("/api/service/:serviceName/:action", async (req, res) => {
   }
 });
 
-// TODO rename to /api/logs/service_name
 // Log streaming endpoint
 app.get("/api/logs/:serviceName", async (req, res) => {
   const { serviceName } = req.params;

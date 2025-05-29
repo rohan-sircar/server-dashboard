@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import MonitorComponent from "./MonitorComponent";
-import ServiceLogViewer from "./ServiceLogViewer";
+import React from "react";
+import ServiceMonitorComponent from "./ServiceMonitorComponent";
 
 interface LlamaServerMonitorProps {
   status: string;
@@ -15,43 +14,16 @@ const LlamaServerMonitor: React.FC<LlamaServerMonitorProps> = ({
   lastChecked,
   showToast,
 }) => {
-  const [showLlamaServerLogs, setShowLlamaServerLogs] = useState(false);
-  const handleStart = async () => {
-    showToast("Starting LLM Server...");
-    try {
-      await fetch("/api/service/llm/start", { method: "POST" });
-    } catch (error) {
-      console.error("Failed to start LLM server", error);
-    }
-  };
-
-  const handleStop = async () => {
-    showToast("Stopping LLM Server...");
-    try {
-      await fetch("/api/service/llm/stop", { method: "POST" });
-    } catch (error) {
-      console.error("Failed to stop LLM server", error);
-    }
-  };
-
   return (
-    <>
-      <MonitorComponent
-        status={status}
-        loading={loading}
-        lastChecked={lastChecked}
-        serviceName="LLM Server"
-        onStart={handleStart}
-        onStop={handleStop}
-        onShowLogs={() => setShowLlamaServerLogs(true)}
-      />
-      {showLlamaServerLogs && (
-        <ServiceLogViewer
-          serviceName="llama.cpp-server"
-          onClose={() => setShowLlamaServerLogs(false)}
-        />
-      )}
-    </>
+    <ServiceMonitorComponent
+      status={status}
+      loading={loading}
+      lastChecked={lastChecked}
+      showToast={showToast}
+      serviceName="llama.cpp-server"
+      servicePath="llm"
+      displayName="LLM Server"
+    />
   );
 };
 

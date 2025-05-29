@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import MonitorComponent from "./MonitorComponent";
-import ServiceLogViewer from "./ServiceLogViewer";
+import React from "react";
+import ServiceMonitorComponent from "./ServiceMonitorComponent";
 
 interface AlltalkTtsServerMonitorProps {
   status: string;
@@ -15,44 +14,16 @@ const AlltalkTtsServerMonitor: React.FC<AlltalkTtsServerMonitorProps> = ({
   lastChecked,
   showToast,
 }) => {
-  const [showAlltalkTtsServerLogs, setShowAlltalkTtsServerLogs] =
-    useState(false);
-  const handleStart = async () => {
-    showToast("Starting AllTalk TTS Server...");
-    try {
-      await fetch("/api/service/alltalk-tts/start", { method: "POST" });
-    } catch (error) {
-      console.error("Failed to start AllTalk TTS server", error);
-    }
-  };
-
-  const handleStop = async () => {
-    showToast("Stopping AllTalk TTS Server...");
-    try {
-      await fetch("/api/service/alltalk-tts/stop", { method: "POST" });
-    } catch (error) {
-      console.error("Failed to stop AllTalk TTS server", error);
-    }
-  };
-
   return (
-    <>
-      <MonitorComponent
-        status={status}
-        loading={loading}
-        lastChecked={lastChecked}
-        serviceName="AllTalk TTS Server"
-        onStart={handleStart}
-        onStop={handleStop}
-        onShowLogs={() => setShowAlltalkTtsServerLogs(true)}
-      />
-      {showAlltalkTtsServerLogs && (
-        <ServiceLogViewer
-          serviceName="alltalk-server"
-          onClose={() => setShowAlltalkTtsServerLogs(false)}
-        />
-      )}
-    </>
+    <ServiceMonitorComponent
+      status={status}
+      loading={loading}
+      lastChecked={lastChecked}
+      showToast={showToast}
+      serviceName="alltalk-server"
+      servicePath="alltalk-tts"
+      displayName="AllTalk TTS Server"
+    />
   );
 };
 

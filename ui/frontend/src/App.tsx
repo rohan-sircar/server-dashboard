@@ -8,6 +8,43 @@ import ServerMonitor from "./components/ServerMonitor";
 import LlamaServerMonitor from "./components/LlamaServerMonitor";
 import ComfyuiServerMonitor from "./components/ComfyuiServerMonitor";
 import AlltalkTtsServerMonitor from "./components/AlltalkTtsServerMonitor";
+import {
+  ThemeProvider,
+  createTheme,
+  CssBaseline,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Box,
+} from "@mui/material";
+import {
+  CheckCircle as CheckCircleIcon,
+  Error as ErrorIcon,
+  Warning as WarningIcon,
+  PauseCircle as PauseCircleIcon,
+} from "@mui/icons-material";
+
+// Create dark theme with accent color
+const theme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "#4fc3f7", // Vibrant blue accent color
+    },
+    background: {
+      default: "#121212",
+      paper: "#1e1e1e",
+    },
+  },
+  typography: {
+    fontFamily: "Roboto, Open Sans, sans-serif",
+    h1: {
+      fontSize: "2.5rem",
+      fontWeight: 500,
+    },
+  },
+});
 
 interface Config {
   pollInterval: number;
@@ -93,40 +130,126 @@ const App = () => {
   }, [checkStatus, config?.pollInterval]);
 
   return (
-    <>
-      <div style={{ textAlign: "center", marginTop: "50px" }}>
-        <h1>PC Server Monitor</h1>
-        <ServerMonitor
-          status={status}
-          loading={loading}
-          lastChecked={lastChecked}
-          llmServerStatus={llmServerStatus}
-          onShowLogs={function (): void {
-            throw new Error("Function not implemented.");
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Typography variant="h1" align="center" gutterBottom>
+          PC Server Monitor
+        </Typography>
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: 3,
+            justifyContent: "center",
           }}
-          showToast={showToast}
-        />
-        <AlltalkTtsServerMonitor
-          status={alltalkTtsServerStatus}
-          loading={loading}
-          lastChecked={lastChecked}
-          showToast={showToast}
-        />
-        <ComfyuiServerMonitor
-          status={comfyuiServerStatus}
-          loading={loading}
-          lastChecked={lastChecked}
-          showToast={showToast}
-        />
-        <LlamaServerMonitor
-          status={llmServerStatus}
-          loading={loading}
-          lastChecked={lastChecked}
-          showToast={showToast}
-        />
-      </div>
-      <ToastContainer toasts={toasts} />
-    </>
+        >
+          <Box sx={{ width: { xs: "100%", md: "48%" } }}>
+            <Card
+              className="monitor-card"
+              sx={{
+                background:
+                  "linear-gradient(to bottom right, #1e1e1e, #2a2a2a)",
+                boxShadow: 3,
+                borderRadius: 2,
+                "&:hover": {
+                  boxShadow: 6,
+                },
+              }}
+            >
+              <CardContent>
+                <ServerMonitor
+                  status={status}
+                  loading={loading}
+                  lastChecked={lastChecked}
+                  llmServerStatus={llmServerStatus}
+                  onShowLogs={function (): void {
+                    throw new Error("Function not implemented.");
+                  }}
+                  showToast={showToast}
+                />
+              </CardContent>
+            </Card>
+          </Box>
+
+          <Box sx={{ width: { xs: "100%", md: "48%" } }}>
+            <Card
+              className="monitor-card"
+              sx={{
+                background:
+                  "linear-gradient(to bottom right, #1e1e1e, #2a2a2a)",
+                boxShadow: 3,
+                borderRadius: 2,
+                "&:hover": {
+                  boxShadow: 6,
+                },
+              }}
+            >
+              <CardContent>
+                <AlltalkTtsServerMonitor
+                  status={alltalkTtsServerStatus}
+                  loading={loading}
+                  lastChecked={lastChecked}
+                  showToast={showToast}
+                />
+              </CardContent>
+            </Card>
+          </Box>
+
+          <Box sx={{ width: { xs: "100%", md: "48%" } }}>
+            <Card
+              className="monitor-card"
+              sx={{
+                background:
+                  "linear-gradient(to bottom right, #1e1e1e, #2a2a2a)",
+                boxShadow: 3,
+                borderRadius: 2,
+                "&:hover": {
+                  boxShadow: 6,
+                },
+              }}
+            >
+              <CardContent>
+                <ComfyuiServerMonitor
+                  status={comfyuiServerStatus}
+                  loading={loading}
+                  lastChecked={lastChecked}
+                  showToast={showToast}
+                />
+              </CardContent>
+            </Card>
+          </Box>
+
+          <Box sx={{ width: { xs: "100%", md: "48%" } }}>
+            <Card
+              className="monitor-card"
+              sx={{
+                background:
+                  "linear-gradient(to bottom right, #1e1e1e, #2a2a2a)",
+                boxShadow: 3,
+                borderRadius: 2,
+                "&:hover": {
+                  boxShadow: 6,
+                },
+              }}
+            >
+              <CardContent>
+                <LlamaServerMonitor
+                  status={llmServerStatus}
+                  loading={loading}
+                  lastChecked={lastChecked}
+                  showToast={showToast}
+                />
+              </CardContent>
+            </Card>
+          </Box>
+        </Box>
+
+        <ToastContainer toasts={toasts} />
+      </Container>
+    </ThemeProvider>
   );
 };
 

@@ -40,3 +40,29 @@
 .read-the-docs {
   color: #888;
 }
+
+/* New styles for monitor cards */
+.monitor-card {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.monitor-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.metric-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.metric-label {
+  font-weight: 500;
+}
+
+.last-checked {
+  font-size: 0.9rem;
+  color: #888;
+  margin-top: 8px;
+}

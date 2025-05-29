@@ -46,9 +46,9 @@ const ServerMonitor: React.FC<ServerMonitorProps> = ({
         loading={loading}
         lastChecked={lastChecked}
         serviceName="PC Server"
-        labelStart="Wake Server"
+        labelStart="Wake"
         onStart={handleWake}
-        labelStop="Suspend Server"
+        labelStop="Suspend"
         onStop={handleSuspend}
         onShowLogs={onShowLogs}
         stopDisabled={llmServerStatus === "online"}

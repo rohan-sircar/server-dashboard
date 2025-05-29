@@ -48,7 +48,8 @@ app.get("/hc", async (req, res) => {
       status: "ok",
       serverStatus: data.status,
       llmServerStatus: data.llmServerStatus,
-      comfyuiServerStatus: data.comfyuiServerStatus || "offline",
+      comfyuiServerStatus: data.comfyuiServerStatus,
+      alltalkTtsServerStatus: data.alltalkTtsServerStatus,
     });
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {

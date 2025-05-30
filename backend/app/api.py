@@ -238,8 +238,8 @@ async def trigger_build():
 async def abort_build():
     global build_thread
 
-    if not build_thread or not build_thread.is_alive():
-        return {"status": "error", "message": "No active build to abort"}
+    # if not build_thread or not build_thread.is_alive():
+    #     return {"status": "error", "message": "No active build to abort"}
 
     build_thread.stop()
     return {"status": "success", "message": "Build abort requested"}

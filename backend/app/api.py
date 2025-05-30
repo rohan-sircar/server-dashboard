@@ -8,7 +8,7 @@ import asyncio
 import logging
 import time
 import json
-from ..build_llama import BuildThread
+from backend.build_llama import BuildThread
 
 app = FastAPI()
 

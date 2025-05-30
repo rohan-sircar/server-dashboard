@@ -221,18 +221,27 @@ async def trigger_build(mock: bool = False):
     if build_thread and build_thread.is_alive():
         return {"status": "error", "message": "Build already in progress"}
 
-    def stream_generator():
-        def callback(output):
-            yield f"{json.dumps({'output': output})}\n\n"
+    async def stream_generator():
+        output_queue = asyncio.Queue()
+
+        def callback(data):
+            asyncio.create_task(output_queue.put({'output': data}))
 
         build_thread = MockBuildThread(
             callback) if mock else RealBuildThread(callback)
         build_thread.start()
 
-        while build_thread.is_alive():
-            time.sleep(0.1)
+        async def generate():
+            while build_thread.is_alive():
+                try:
+                    data = await asyncio.wait_for(output_queue.get(), timeout=0.1)
+                    yield f"{json.dumps(data)}\n\n"
+                except asyncio.TimeoutError:
+                    continue
 
-        yield f"{json.dumps({'status': 'completed', 'success': build_thread.result})}\n\n"
+            yield f"{json.dumps({'status': 'completed', 'success': build_thread.result})}\n\n"
+
+        return generate()
 
     return StreamingResponse(
         stream_generator(),

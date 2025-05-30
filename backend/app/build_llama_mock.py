@@ -48,9 +48,14 @@ class BuildThread(threading.Thread):
         self.build_process = MockBuildProcess()
 
     def run(self):
-        for output in mock_build_llama(self.build_process):
-            self.callback(output)
-        self.result = True if "successfully" in output else False
+        try:
+            for output in mock_build_llama(self.build_process):
+                # Ensure output is properly formatted for streaming
+                self.callback({'output': output.strip()})
+            self.result = True if "successfully" in output else False
+        except Exception as e:
+            self.callback({'error': str(e)})
+            self.result = False
 
     def stop(self):
         self.build_process.stop()

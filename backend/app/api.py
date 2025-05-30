@@ -236,12 +236,13 @@ async def trigger_build(mock: bool = False):
 
     async def stream_generator():
         try:
-            while build_thread.is_alive():
-                try:
-                    data = await asyncio.wait_for(output_queue.get(), timeout=0.1)
-                    yield f"{json.dumps(data)}"
-                except asyncio.TimeoutError:
-                    continue
+            while True:
+                data = await output_queue.get()
+                yield f"{json.dumps(data)}\n"
+
+                # Check if thread is done and queue is empty
+                if not build_thread.is_alive() and output_queue.empty():
+                    break
 
             yield f"{json.dumps({'status': 'completed', 'success': build_thread.result})}\n\n"
         finally:

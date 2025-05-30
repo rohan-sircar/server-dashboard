@@ -267,6 +267,8 @@ async def abort_build():
     # Stop the build thread first
     build_thread.stop()
 
+    repo_path = "/home/llama.cpp/repo"
+
     # Try to restore backup if exists
     try:
         repo_path = Path(repo_path)
@@ -288,8 +290,7 @@ async def abort_build():
             "details": str(e)
         }
 
-     # Restore ownership to llama.cpp
-    repo_path = "/home/llama.cpp/repo"
+    # Restore ownership to llama.cpp
     chown_cmd = ["sudo", "chown", "-R", "llama.cpp:users", repo_path]
     try:
         process = await asyncio.create_subprocess_exec(

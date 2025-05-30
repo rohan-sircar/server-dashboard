@@ -6,6 +6,9 @@ import httpx
 from fastapi.responses import JSONResponse
 import asyncio
 import logging
+import time
+import json
+from ..build_llama import BuildThread
 
 app = FastAPI()
 
@@ -22,6 +25,8 @@ VALID_SERVICES = {
     "alltalk-tts": "alltalk-server.service",
     "alltalk-finetune": "alltalk-finetune.service"
 }
+
+build_thread = None
 
 
 def validate_service_name(service_name: str) -> None:
@@ -175,14 +180,10 @@ async def service_status(service_name: str):
     return await check_service_status(status_urls[service_name])
 
 
-SERVICE_NAME_PATTERN = r"^[a-zA-Z0-9\-\.]+$"
-
-
 @app.get("/api/logs/{service_name}")
 async def stream_logs(service_name: str):
     """Stream logs for a specific service using journalctl"""
-    if not re.match(SERVICE_NAME_PATTERN, service_name):
-        raise HTTPException(status_code=400, detail="Invalid service name")
+    validate_service_name(service_name)
 
     cmd = f"sudo journalctl -f -u {service_name}"
     proc = await asyncio.create_subprocess_shell(
@@ -206,6 +207,42 @@ async def stream_logs(service_name: str):
                 pass
 
     return StreamingResponse(generate(), media_type="text/event-stream")
+
+
+@app.post("/api/build-llama")
+async def trigger_build():
+    global build_thread
+
+    if build_thread and build_thread.is_alive():
+        return {"status": "error", "message": "Build already in progress"}
+
+    def stream_generator():
+        def callback(output):
+            yield f"{json.dumps({'output': output})}\n\n"
+
+        build_thread = BuildThread(callback)
+        build_thread.start()
+
+        while build_thread.is_alive():
+            time.sleep(0.1)
+
+        yield f"{json.dumps({'status': 'completed', 'success': build_thread.result})}\n\n"
+
+    return StreamingResponse(
+        stream_generator(),
+        media_type="text/event-stream"
+    )
+
+
+@app.post("/api/build-llama/abort")
+async def abort_build():
+    global build_thread
+
+    if not build_thread or not build_thread.is_alive():
+        return {"status": "error", "message": "No active build to abort"}
+
+    build_thread.stop()
+    return {"status": "success", "message": "Build abort requested"}
 
 
 @app.exception_handler(Exception)

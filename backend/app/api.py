@@ -262,8 +262,54 @@ async def abort_build():
     if not build_thread or not build_thread.is_alive():
         return {"status": "error", "message": "No active build to abort"}
 
+    # Stop the build thread first
     build_thread.stop()
-    return {"status": "success", "message": "Build abort requested"}
+
+    # Restore ownership to llama.cpp
+    repo_path = "/home/llama.cpp/repo"
+    chown_cmd = ["sudo", "chown", "-R", "llama.cpp:users", repo_path]
+    try:
+        process = await asyncio.create_subprocess_exec(
+            *chown_cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await process.communicate()
+        if process.returncode != 0:
+            return {
+                "status": "warning",
+                "message": "Build aborted but ownership restore failed",
+                "details": stderr.decode().strip()
+            }
+    except Exception as e:
+        return {
+            "status": "warning",
+            "message": "Build aborted but ownership restore failed",
+            "details": str(e)
+        }
+
+    # Try to restore backup if exists
+    try:
+        repo_path = Path(repo_path)
+        build_dir = repo_path / "build-wmma"
+        backup_dirs = sorted(repo_path.glob("build-wmma.*"),
+                             key=os.path.getmtime, reverse=True)
+
+        if backup_dirs and backup_dirs[0].exists():
+            shutil.move(str(backup_dirs[0]), str(build_dir))
+            return {
+                "status": "success",
+                "message": "Build aborted and backup restored",
+                "backup_restored": str(backup_dirs[0])
+            }
+    except Exception as e:
+        return {
+            "status": "warning",
+            "message": "Build aborted but backup restore failed",
+            "details": str(e)
+        }
+
+    return {"status": "success", "message": "Build aborted"}
 
 
 # @app.exception_handler(Exception)

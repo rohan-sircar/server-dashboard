@@ -24,6 +24,22 @@ def build_llama(build_process: BuildProcess = None) -> Generator[str, None, bool
     timestamp = int(time.time())
 
     try:
+        # Change ownership to server-dashboard for build
+        yield "Changing repository ownership to server-dashboard...\n"
+        chown_cmd = ["sudo", "chown", "-R",
+                     "server-dashboard:users", str(repo_path)]
+        chown = subprocess.Popen(
+            chown_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True
+        )
+        for line in chown.stdout:
+            yield line
+        chown.wait()
+        if chown.returncode != 0:
+            raise subprocess.CalledProcessError(chown.returncode, chown.args)
+
         # Backup existing build if exists
         if build_dir.exists():
             backup_dir = repo_path / f"build-wmma.{timestamp}"
@@ -104,6 +120,22 @@ def build_llama(build_process: BuildProcess = None) -> Generator[str, None, bool
             raise subprocess.CalledProcessError(build.returncode, build.args)
 
         yield "Build completed successfully!\n"
+
+        # Restore ownership to llama.cpp
+        yield "Restoring repository ownership to llama.cpp...\n"
+        chown_cmd = ["sudo", "chown", "-R", "llama.cpp:users", str(repo_path)]
+        chown = subprocess.Popen(
+            chown_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True
+        )
+        for line in chown.stdout:
+            yield line
+        chown.wait()
+        if chown.returncode != 0:
+            yield "Warning: Failed to restore ownership to llama.cpp\n"
+
         return True
 
     except subprocess.CalledProcessError as e:
@@ -120,6 +152,21 @@ def build_llama(build_process: BuildProcess = None) -> Generator[str, None, bool
         if backup_dir.exists():
             shutil.move(str(backup_dir), str(build_dir))
             yield f"Restored backup from {backup_dir}\n"
+
+        # Restore ownership to llama.cpp on failure
+        yield "Restoring repository ownership to llama.cpp...\n"
+        chown_cmd = ["sudo", "chown", "-R", "llama.cpp:users", str(repo_path)]
+        chown = subprocess.Popen(
+            chown_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True
+        )
+        for line in chown.stdout:
+            yield line
+        chown.wait()
+        if chown.returncode != 0:
+            yield "Warning: Failed to restore ownership to llama.cpp\n"
 
         return False
 

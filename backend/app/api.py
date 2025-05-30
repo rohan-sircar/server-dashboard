@@ -275,10 +275,13 @@ async def abort_build():
         build_dir = repo_path / "build-wmma"
         backup_dirs = sorted(repo_path.glob("build-wmma.*"),
                              key=os.path.getmtime, reverse=True)
-        shutil.rmtree(build_dir)
 
         if backup_dirs and backup_dirs[0].exists():
-            shutil.move(str(backup_dirs[0]), str(repo_path))
+            # First delete the destination if it exists (shouldn't after rmtree)
+            if build_dir.exists():
+                shutil.rmtree(build_dir)
+            # Then rename backup to build-wmma
+            backup_dirs[0].rename(build_dir)
             return {
                 "status": "success",
                 "message": "Build aborted and backup restored",
@@ -290,28 +293,28 @@ async def abort_build():
             "message": "Build aborted but backup restore failed",
             "details": str(e)
         }
-
-    # Restore ownership to llama.cpp
-    chown_cmd = ["sudo", "chown", "-R", "llama.cpp:users", repo_path]
-    try:
-        process = await asyncio.create_subprocess_exec(
-            *chown_cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await process.communicate()
-        if process.returncode != 0:
+    finally:
+        # Restore ownership to llama.cpp
+        chown_cmd = ["sudo", "chown", "-R", "llama.cpp:users", repo_path]
+        try:
+            process = await asyncio.create_subprocess_exec(
+                *chown_cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await process.communicate()
+            if process.returncode != 0:
+                return {
+                    "status": "warning",
+                    "message": "Build aborted but ownership restore failed",
+                    "details": stderr.decode().strip()
+                }
+        except Exception as e:
             return {
                 "status": "warning",
                 "message": "Build aborted but ownership restore failed",
-                "details": stderr.decode().strip()
+                "details": str(e)
             }
-    except Exception as e:
-        return {
-            "status": "warning",
-            "message": "Build aborted but ownership restore failed",
-            "details": str(e)
-        }
 
     return {"status": "success", "message": "Build aborted"}
 

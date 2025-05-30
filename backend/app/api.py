@@ -179,11 +179,14 @@ async def service_status(service_name: str):
 
     return await check_service_status(status_urls[service_name])
 
+SERVICE_NAME_PATTERN = r"^[a-zA-Z0-9\-\.]+$"
+
 
 @app.get("/api/logs/{service_name}")
 async def stream_logs(service_name: str):
     """Stream logs for a specific service using journalctl"""
-    validate_service_name(service_name)
+    if not re.match(SERVICE_NAME_PATTERN, service_name):
+        raise HTTPException(status_code=400, detail="Invalid service name")
 
     cmd = f"sudo journalctl -f -u {service_name}"
     proc = await asyncio.create_subprocess_shell(

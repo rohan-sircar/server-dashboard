@@ -97,7 +97,7 @@ def build_llama(build_process: BuildProcess = None) -> Generator[str, None, bool
         build_cmd = ["cmake", "--build", "build-wmma",
                      "--config", "Release", "--", "-j", "16"]
         build = subprocess.Popen(
-            ["sudo", "-u", "llama.cpp"] + build_cmd,
+            build_cmd,
             cwd=repo_path,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,

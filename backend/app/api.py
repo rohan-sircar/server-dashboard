@@ -267,7 +267,28 @@ async def abort_build():
     # Stop the build thread first
     build_thread.stop()
 
-    # Restore ownership to llama.cpp
+    # Try to restore backup if exists
+    try:
+        repo_path = Path(repo_path)
+        build_dir = repo_path / "build-wmma"
+        backup_dirs = sorted(repo_path.glob("build-wmma.*"),
+                             key=os.path.getmtime, reverse=True)
+
+        if backup_dirs and backup_dirs[0].exists():
+            shutil.move(str(backup_dirs[0]), str(build_dir))
+            return {
+                "status": "success",
+                "message": "Build aborted and backup restored",
+                "backup_restored": str(backup_dirs[0])
+            }
+    except Exception as e:
+        return {
+            "status": "warning",
+            "message": "Build aborted but backup restore failed",
+            "details": str(e)
+        }
+
+     # Restore ownership to llama.cpp
     repo_path = "/home/llama.cpp/repo"
     chown_cmd = ["sudo", "chown", "-R", "llama.cpp:users", repo_path]
     try:
@@ -287,27 +308,6 @@ async def abort_build():
         return {
             "status": "warning",
             "message": "Build aborted but ownership restore failed",
-            "details": str(e)
-        }
-
-    # Try to restore backup if exists
-    try:
-        repo_path = Path(repo_path)
-        build_dir = repo_path / "build-wmma"
-        backup_dirs = sorted(repo_path.glob("build-wmma.*"),
-                             key=os.path.getmtime, reverse=True)
-
-        if backup_dirs and backup_dirs[0].exists():
-            shutil.move(str(backup_dirs[0]), str(build_dir))
-            return {
-                "status": "success",
-                "message": "Build aborted and backup restored",
-                "backup_restored": str(backup_dirs[0])
-            }
-    except Exception as e:
-        return {
-            "status": "warning",
-            "message": "Build aborted but backup restore failed",
             "details": str(e)
         }
 

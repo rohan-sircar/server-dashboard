@@ -275,9 +275,10 @@ async def abort_build():
         build_dir = repo_path / "build-wmma"
         backup_dirs = sorted(repo_path.glob("build-wmma.*"),
                              key=os.path.getmtime, reverse=True)
+        shutil.rmtree(build_dir)
 
         if backup_dirs and backup_dirs[0].exists():
-            shutil.move(str(backup_dirs[0]), str(build_dir))
+            shutil.move(str(backup_dirs[0]), str(repo_path))
             return {
                 "status": "success",
                 "message": "Build aborted and backup restored",

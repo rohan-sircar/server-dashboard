@@ -244,8 +244,6 @@ async def trigger_build(mock: bool = False):
             if build_thread.is_alive():
                 build_thread.stop()
 
-        return generate()
-
     return StreamingResponse(
         stream_generator(),
         media_type="text/event-stream"

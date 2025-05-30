@@ -2,13 +2,15 @@ import re
 from fastapi.responses import StreamingResponse
 import os
 from fastapi import FastAPI, HTTPException
+from fastapi.exception_handlers import http_exception_handler
 import httpx
 from fastapi.responses import JSONResponse
 import asyncio
 import logging
 import time
 import json
-from .build_llama import BuildThread
+from .build_llama import BuildThread as RealBuildThread
+from .build_llama_mock import BuildThread as MockBuildThread
 
 app = FastAPI()
 
@@ -213,7 +215,7 @@ async def stream_logs(service_name: str):
 
 
 @app.post("/api/build-llama")
-async def trigger_build():
+async def trigger_build(mock: bool = False):
     global build_thread
 
     if build_thread and build_thread.is_alive():
@@ -223,7 +225,8 @@ async def trigger_build():
         def callback(output):
             yield f"{json.dumps({'output': output})}\n\n"
 
-        build_thread = BuildThread(callback)
+        build_thread = MockBuildThread(
+            callback) if mock else RealBuildThread(callback)
         build_thread.start()
 
         while build_thread.is_alive():
@@ -241,14 +244,14 @@ async def trigger_build():
 async def abort_build():
     global build_thread
 
-    # if not build_thread or not build_thread.is_alive():
-    #     return {"status": "error", "message": "No active build to abort"}
+    if not build_thread or not build_thread.is_alive():
+        return {"status": "error", "message": "No active build to abort"}
 
     build_thread.stop()
     return {"status": "success", "message": "Build abort requested"}
 
 
-@app.exception_handler(Exception)
-async def custom_exception_handler(request, exc):
-    logging.error(f"Error occurred: {str(exc)}")
-    return await http_exception_handler(request, exc)
+# @app.exception_handler(Exception)
+# async def custom_exception_handler(request, exc):
+#     logging.error(f"Error occurred: {str(exc)}")
+#     return await http_exception_handler(request, exc)

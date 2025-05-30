@@ -222,9 +222,13 @@ async def trigger_build(mock: bool = False):
         return {"status": "error", "message": "Build already in progress"}
 
     output_queue = asyncio.Queue()
+    loop = asyncio.get_running_loop()
 
     def callback(data):
-        asyncio.create_task(output_queue.put({'output': data}))
+        asyncio.run_coroutine_threadsafe(
+            output_queue.put({'output': data}),
+            loop
+        )
 
     build_thread = MockBuildThread(
         callback) if mock else RealBuildThread(callback)

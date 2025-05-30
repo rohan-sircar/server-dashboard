@@ -231,14 +231,18 @@ async def trigger_build(mock: bool = False):
     build_thread.start()
 
     async def stream_generator():
-        while build_thread.is_alive():
-            try:
-                data = await asyncio.wait_for(output_queue.get(), timeout=0.1)
-                yield f"{json.dumps(data)}\n\n"
-            except asyncio.TimeoutError:
-                continue
+        try:
+            while build_thread.is_alive():
+                try:
+                    data = await asyncio.wait_for(output_queue.get(), timeout=0.1)
+                    yield f"{json.dumps(data)}"
+                except asyncio.TimeoutError:
+                    continue
 
-        yield f"{json.dumps({'status': 'completed', 'success': build_thread.result})}\n\n"
+            yield f"{json.dumps({'status': 'completed', 'success': build_thread.result})}\n\n"
+        finally:
+            if build_thread.is_alive():
+                build_thread.stop()
 
         return generate()
 

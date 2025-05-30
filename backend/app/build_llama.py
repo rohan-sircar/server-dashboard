@@ -49,7 +49,7 @@ def build_llama(build_process: BuildProcess = None) -> Generator[str, None, bool
         # Git pull
         yield "Pulling latest changes...\n"
         git_pull = subprocess.Popen(
-            ["sudo", "-u", "llama.cpp", "git", "pull"],
+            ["git", "pull"],
             cwd=repo_path,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -79,7 +79,7 @@ def build_llama(build_process: BuildProcess = None) -> Generator[str, None, bool
             "-DCMAKE_CXX_FLAGS=-I/opt/rocm/include/rocwmma"
         ]
         configure = subprocess.Popen(
-            ["sudo", "-u", "llama.cpp"] + configure_cmd,
+            configure_cmd,
             cwd=repo_path,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
